@@ -4,6 +4,7 @@ const { protect, authorize } = require('../middleware/auth');
 const adminController = require('../controllers/adminController');
 const User = require('../models/User');
 const Class = require('../models/Class');
+const optionsController = require('../controllers/optionsController');
 
 // User management routes
 router.get('/users', protect, authorize('admin'), adminController.getAllUsers);
@@ -117,5 +118,35 @@ router.post('/classes/:classId/students', async (req, res) => {
 
 // Add this route
 router.get('/classes/:classId/students', protect, authorize('admin'), adminController.getClassStudents);
+
+// Add these routes to your admin routes
+router.get('/options', protect, authorize('admin'), optionsController.getOptions);
+router.post('/options', protect, authorize('admin'), optionsController.addOption);
+
+// Get unassigned teachers
+router.get('/users/unassigned-teachers', async (req, res) => {
+  try {
+    const unassignedTeachers = await User.find({
+      role: 'teacher',
+      'teacherDetails.assignedAsIncharge': { $exists: false }
+    });
+    res.json(unassignedTeachers);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get unassigned CRs
+router.get('/users/unassigned-crs', async (req, res) => {
+  try {
+    const unassignedCRs = await User.find({
+      role: 'student',
+      'crDetails.assignedClass': { $exists: false }
+    });
+    res.json(unassignedCRs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router; 

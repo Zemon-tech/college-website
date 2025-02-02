@@ -7,5 +7,6 @@ const studentController = require('../controllers/studentController');
 router.get('/schedule', protect, authorize('student'), studentController.getSchedule);
 router.get('/schedule/:classId', protect, authorize('student'), studentController.getSchedule);
 router.get('/updates', protect, authorize('student'), studentController.getUpdates);
+router.get('/class/:classId', protect, authorize('student'), studentController.getClassDetails);
 
 module.exports = router; 

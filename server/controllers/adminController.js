@@ -118,6 +118,11 @@ exports.createClass = async (req, res) => {
   try {
     const classData = req.body;
     
+    // Generate name if not provided
+    if (!classData.name) {
+      classData.name = `${classData.branch.toUpperCase()} ${classData.course.toUpperCase()} ${classData.year}-${classData.section}`;
+    }
+    
     // Create the class
     const newClass = await Class.create(classData);
     

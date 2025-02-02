@@ -16,7 +16,7 @@ const updateSchema = new mongoose.Schema({
   },
   authorRole: {
     type: String,
-    enum: ['cr', 'teacher', 'admin'],
+    enum: ['admin', 'teacher', 'cr'],
     required: true,
   },
   targetClass: {

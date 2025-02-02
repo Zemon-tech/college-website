@@ -55,4 +55,22 @@ exports.getResources = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error fetching resources' });
   }
+};
+
+exports.getClassDetails = async (req, res) => {
+  try {
+    const classData = await Class.findById(req.params.classId)
+      .populate('classIncharge', 'name email')
+      .populate('teachers', 'name email')
+      .select('name section branch year classIncharge teachers');
+
+    if (!classData) {
+      return res.status(404).json({ message: 'Class not found' });
+    }
+
+    res.json(classData);
+  } catch (error) {
+    console.error('Error fetching class details:', error);
+    res.status(500).json({ message: 'Error fetching class details' });
+  }
 }; 

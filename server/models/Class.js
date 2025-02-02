@@ -5,8 +5,17 @@ const classSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  section: String,
   branch: {
+    type: String,
+    required: true,
+    lowercase: true
+  },
+  course: {
+    type: String,
+    required: true,
+    lowercase: true
+  },
+  section: {
     type: String,
     required: true,
   },
@@ -14,17 +23,22 @@ const classSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  cr: {
+  classIncharge: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    required: true
+  },
+  cr: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
   },
   teachers: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'User'
   }],
   students: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'User'
   }],
   schedule: [{
     day: String,
@@ -40,6 +54,15 @@ const classSchema = new mongoose.Schema({
   }],
 }, {
   timestamps: true
+});
+
+// Add middleware to automatically generate class name
+classSchema.pre('save', function(next) {
+  if (!this.name) {
+    // Format: BRANCH COURSE Section-Year yr (e.g., "BTECH CSE A-1 yr")
+    this.name = `${this.branch.toUpperCase()} ${this.course.toUpperCase()} ${this.section}-${this.year} yr`;
+  }
+  next();
 });
 
 // Add middleware to handle CR removal

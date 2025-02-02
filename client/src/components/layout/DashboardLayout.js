@@ -1,16 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import api from '../../utils/api';
 
 export default function DashboardLayout({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [className, setClassName] = useState('');
+
+  useEffect(() => {
+    const fetchClassName = async () => {
+      try {
+        if (user.role === 'student' && user.studentDetails?.class) {
+          const response = await api.get(`/student/class/${user.studentDetails.class}`);
+          setClassName(response.data.name);
+        } else if (user.role === 'cr' && user.crDetails?.assignedClass) {
+          const response = await api.get(`/cr/class/${user.crDetails.assignedClass}`);
+          setClassName(response.data.name);
+        }
+      } catch (error) {
+        console.error('Error fetching class name:', error);
+      }
+    };
+
+    fetchClassName();
+  }, [user]);
 
   const getNavItems = (role) => {
     const baseItems = [
-      { name: 'Dashboard', path: `/${role}/dashboard` },
+      { name: 'Dashboard', path: `/${role}` },
     ];
 
     switch (role) {
@@ -31,13 +51,17 @@ export default function DashboardLayout({ children }) {
         return [
           ...baseItems,
           { name: 'Updates', path: '/cr/updates' },
-          { name: 'Resources', path: '/cr/resources' }
+          { name: 'Resources', path: '/cr/resources' },
+          { name: 'Faculty', path: '/cr/faculty' },
+          { name: 'Timetable', path: '/cr/timetable' }
         ];
       case 'student':
         return [
           ...baseItems,
           { name: 'Schedule', path: '/student/schedule' },
-          { name: 'Resources', path: '/student/resources' }
+          { name: 'Updates', path: '/student/updates' },
+          { name: 'Resources', path: '/student/resources' },
+          { name: 'Faculty', path: '/student/faculty' }
         ];
       default:
         return baseItems;
@@ -99,6 +123,11 @@ export default function DashboardLayout({ children }) {
               <div className="ml-3 relative">
                 <div className="flex items-center">
                   <span className="text-gray-700 mr-4">{user?.name}</span>
+                  {className && (
+                    <span className="text-sm text-gray-500">
+                      ({className})
+                    </span>
+                  )}
                   <button
                     onClick={handleLogout}
                     className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white"
